@@ -6,6 +6,7 @@ import {
     CheckCircle2, Upload, FileSpreadsheet
 } from 'lucide-react';
 import { generateMockStrategyData, generateMockMarketingPlan } from '../utils/aiHelpers';
+import { supabase } from '../lib/supabase';
 
 
 // UI Components
@@ -472,6 +473,35 @@ Responde SOLO con JSON válido:
 
     };
 
+    // Guardar estrategia en Supabase
+    const [saving, setSaving] = useState(false);
+
+    const saveStrategy = async () => {
+        if (!store.aiRecommendation) return;
+
+        setSaving(true);
+        try {
+            const { error } = await supabase
+                .from('strategies')
+                .insert([
+                    {
+                        business_name: 'Mi Negocio', // Podríamos añadir un campo para esto
+                        business_type: store.businessType,
+                        strategy_data: store.aiRecommendation,
+                        marketing_plan: store.marketingPlan || {}
+                    }
+                ]);
+
+            if (error) throw error;
+            alert('✅ Estrategia guardada correctamente en la nube');
+        } catch (error) {
+            console.error('Error saving strategy:', error);
+            alert('❌ Error al guardar la estrategia');
+        } finally {
+            setSaving(false);
+        }
+    };
+
     const topVentas = store.keyProducts.filter(p => p.tipo === 'top_ventas');
     const bajoVentas = store.keyProducts.filter(p => p.tipo === 'bajo_ventas');
 
@@ -908,7 +938,17 @@ Responde SOLO con JSON válido:
 
                 {/* Resumen */}
                 <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-xl">
-                    <h3 className="font-bold text-lg mb-2">📋 Resumen Ejecutivo</h3>
+                    <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-bold text-lg">📋 Resumen Ejecutivo</h3>
+                        <button
+                            onClick={saveStrategy}
+                            disabled={saving}
+                            className="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-2 transition"
+                        >
+                            {saving ? <Loader2 className="animate-spin" size={16} /> : <Upload size={16} />}
+                            {saving ? 'Guardando...' : 'Guardar en Nube'}
+                        </button>
+                    </div>
                     <p className="text-sm opacity-90">{rec.resumenEstrategia}</p>
                 </div>
 
