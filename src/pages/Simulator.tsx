@@ -183,8 +183,8 @@ Brownie Chocolate;Postres;1.50;5.00;110`;
         const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
 
         if (!apiKey) {
-            alert('Error: No se encontró la API key. Verifica tu archivo .env');
-            setAiLoading(false);
+            console.warn('API Key not found, using mock data');
+            generateMockStrategy();
             return;
         }
 
@@ -371,6 +371,15 @@ Responde SOLO con JSON válido (sin markdown):
     const generateMarketingPlan = async () => {
         setMarketingLoading(true);
         const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
+
+        if (!apiKey) {
+            console.warn('API Key not found, using mock marketing plan');
+            const mockPlan = generateMockMarketingPlan(store);
+            store.setMarketingPlan(mockPlan);
+            alert('⚠️ Plan de Marketing generado con datos simulados (API no disponible)');
+            setMarketingLoading(false);
+            return;
+        }
 
         const schedule = store.businessSchedule;
         const prompt = `Actúa como Experto en Marketing Digital para ${store.businessType === 'horeca' ? 'Hostelería' : 'Retail'}.
