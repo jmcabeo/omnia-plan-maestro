@@ -3,7 +3,7 @@ import { useAppStore } from '../store/useAppStore';
 import {
     Target, Store, ChevronRight, ChevronLeft, Plus, Trash2, List, Sparkles,
     Bot, Loader2, Award, Clock, Gift, CreditCard, Megaphone, Settings,
-    CheckCircle2, Upload, FileSpreadsheet
+    CheckCircle2, Upload, FileSpreadsheet, Info
 } from 'lucide-react';
 import { generateMockStrategyData, generateMockMarketingPlan } from '../utils/aiHelpers';
 import { supabase } from '../lib/supabase';
@@ -836,6 +836,75 @@ Responde SOLO con JSON válido:
                         <div className="text-4xl font-black">{rec.roiEstimado}x</div>
                     </div>
                 </div>
+
+                {/* Resumen Económico */}
+                {(() => {
+                    // Calcular coste estimado de premios
+                    const participacionEstimada = store.traficoMensual * 0.15; // 15% del tráfico participa
+                    let costePremiosEstimado = 0;
+
+                    rec.juegos?.forEach(juego => {
+                        juego.premios?.forEach((premio: any) => {
+                            costePremiosEstimado += premio.costo * (premio.probabilidad / 100) * participacionEstimada;
+                        });
+                    });
+
+                    // Beneficio generado por gasto mínimo
+                    const gastoMinimoPromedio = rec.juegos?.[0]?.gastoMinimo || store.ticketPromedio;
+                    const beneficioGenerado = participacionEstimada * gastoMinimoPromedio * (store.margenPromedio / 100);
+
+                    // Presupuesto para Ads (el presupuesto de marketing real)
+                    const presupuestoAds = presupuestoMarketing;
+
+                    return (
+                        <div className="bg-slate-800 rounded-xl p-6 text-white">
+                            <h3 className="font-bold text-lg mb-4 flex items-center gap-2">💰 Resumen Económico Mensual</h3>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                <div className="bg-white/10 rounded-lg p-4 relative group">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <p className="text-xs text-slate-300">Presupuesto Ads</p>
+                                        <span title={`= Facturación (€${store.facturacionMensual}) × ${store.presupuestoMarketingPorcentaje}% = €${presupuestoAds.toFixed(0)}. Este es tu presupuesto real para publicidad pagada en Meta/Google.`}>
+                                            <Info size={14} className="text-slate-400 cursor-help" />
+                                        </span>
+                                    </div>
+                                    <p className="text-2xl font-black text-blue-400">€{presupuestoAds.toFixed(0)}</p>
+                                    <p className="text-xs text-slate-400 mt-1">Meta/Google Ads</p>
+                                </div>
+
+                                <div className="bg-white/10 rounded-lg p-4 relative">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <p className="text-xs text-slate-300">Coste Premios</p>
+                                        <span title={`= Σ(costo premio × probabilidad × ${participacionEstimada.toFixed(0)} participantes). Estimado de cuánto cuestan los productos que regalas. NO es una pérdida porque el gasto mínimo lo cubre.`}>
+                                            <Info size={14} className="text-slate-400 cursor-help" />
+                                        </span>
+                                    </div>
+                                    <p className="text-2xl font-black text-amber-400">€{costePremiosEstimado.toFixed(0)}</p>
+                                    <p className="text-xs text-slate-400 mt-1">~{participacionEstimada.toFixed(0)} participantes</p>
+                                </div>
+
+                                <div className="bg-white/10 rounded-lg p-4 relative">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <p className="text-xs text-slate-300">Beneficio Generado</p>
+                                        <span title={`= ${participacionEstimada.toFixed(0)} participantes × €${gastoMinimoPromedio} gasto mínimo × ${store.margenPromedio}% margen = €${beneficioGenerado.toFixed(0)}. El beneficio que generas gracias a que cada participante gasta el mínimo.`}>
+                                            <Info size={14} className="text-slate-400 cursor-help" />
+                                        </span>
+                                    </div>
+                                    <p className="text-2xl font-black text-green-400">€{beneficioGenerado.toFixed(0)}</p>
+                                    <p className="text-xs text-slate-400 mt-1">Por gasto mínimo</p>
+                                </div>
+                            </div>
+
+                            <div className="bg-green-900/30 border border-green-500/30 rounded-lg p-3 flex items-start gap-2">
+                                <Info size={16} className="text-green-400 mt-0.5 flex-shrink-0" />
+                                <p className="text-sm text-green-300">
+                                    <strong>Los premios se autofinancian:</strong> El gasto mínimo (€{gastoMinimoPromedio}) genera €{(gastoMinimoPromedio * store.margenPromedio / 100).toFixed(2)} de beneficio, cubriendo el coste del premio.
+                                </p>
+                            </div>
+                        </div>
+                    );
+
+                })()}
 
                 {/* Juegos */}
                 {rec.juegos && rec.juegos.map(juego => (
