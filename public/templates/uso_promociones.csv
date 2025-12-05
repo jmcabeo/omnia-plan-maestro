@@ -1,0 +1,6 @@
+promo_id,nombre,tipo_promo,canal,fecha_inicio,fecha_fin,redenciones,tasa_redencion,costo_total,ventas_generadas,ticket_medio_promo
+1,2x1 en Cafés,2x1,App,2024-11-01,2024-11-30,85,12.5,340.00,1200.00,14.12
+2,Descuento 20% Comidas,Descuento,Email,2024-11-15,2024-11-30,42,8.3,180.00,850.00,20.24
+3,Ruleta de Premios,Gamificación,Presencial,2024-12-01,2024-12-15,120,18.5,480.00,2400.00,20.00
+4,Happy Hour Bebidas,Descuento,Redes,2024-11-20,2024-12-05,68,15.2,272.00,1150.00,16.91
+5,Regalo Postre,Regalo,App,2024-11-10,2024-11-25,55,10.8,165.00,720.00,13.09

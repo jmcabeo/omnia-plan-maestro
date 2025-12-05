@@ -1,0 +1,16 @@
+id,name,categoria,cost,price,sales,margen_porcentaje
+1,Café Americano,Bebidas,0.80,3.50,450,77.14
+2,Café con Leche,Bebidas,1.00,4.00,380,75.00
+3,Cerveza Artesanal,Bebidas,1.20,5.00,320,76.00
+4,Refresco,Bebidas,0.50,2.50,280,80.00
+5,Agua Mineral,Bebidas,0.30,2.00,200,85.00
+6,Hamburguesa Clásica,Comidas,5.00,15.00,180,66.67
+7,Pizza Margarita,Comidas,4.50,14.00,150,67.86
+8,Ensalada César,Comidas,3.00,12.00,120,75.00
+9,Pasta Carbonara,Comidas,3.50,13.50,140,74.07
+10,Bocadillo Mixto,Comidas,2.50,8.00,200,68.75
+11,Tarta de Queso,Postres,2.00,6.50,90,69.23
+12,Brownie,Postres,1.50,5.00,110,70.00
+13,Helado,Postres,1.00,4.50,85,77.78
+14,Croissant,Desayuno,0.60,2.50,250,76.00
+15,Tostadas,Desayuno,0.80,3.50,220,77.14
