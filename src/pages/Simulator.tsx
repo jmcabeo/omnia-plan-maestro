@@ -706,9 +706,9 @@ Responde SOLO con JSON válido:
                 </div>
 
                 <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-                    <label className="font-bold text-green-800 flex items-center gap-2 mb-2"><CreditCard size={18} /> Vales €</label>
+                    <label className="font-bold text-green-800 flex items-center gap-2 mb-2"><CreditCard size={18} /> Cheques Regalo €</label>
                     <input type="number" min="0" max="5" className="w-full p-2 border rounded" value={store.strategyConfig.numVales} onChange={e => store.updateStrategyConfig('numVales', parseInt(e.target.value) || 0)} />
-                    <p className="text-xs text-green-600 mt-1">Con gasto mínimo (upsell)</p>
+                    <p className="text-xs text-green-600 mt-1">Tarjetas regalo sin gasto mínimo</p>
                 </div>
             </div>
 
@@ -718,14 +718,6 @@ Responde SOLO con JSON válido:
                     <div>
                         <span className="font-bold">🎫 Tarjeta de Sellos</span>
                         <p className="text-xs text-slate-500">Para consumidores de producto específico (ej: menú)</p>
-                    </div>
-                </label>
-
-                <label className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition ${store.strategyConfig.tarjetaPuntos ? 'bg-blue-50 border-blue-400' : 'bg-slate-50 border-slate-200'}`}>
-                    <input type="checkbox" checked={store.strategyConfig.tarjetaPuntos} onChange={e => store.updateStrategyConfig('tarjetaPuntos', e.target.checked)} className="w-5 h-5" />
-                    <div>
-                        <span className="font-bold">💎 Tarjeta de Puntos</span>
-                        <p className="text-xs text-slate-500">General, entregada por camarero en barra</p>
                     </div>
                 </label>
             </div>
@@ -778,9 +770,8 @@ Responde SOLO con JSON válido:
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                     <div className="bg-white p-2 rounded"><span className="text-slate-500">Juegos:</span> <span className="font-bold">{store.strategyConfig.numJuegos}</span></div>
                     <div className="bg-white p-2 rounded"><span className="text-slate-500">Cupones:</span> <span className="font-bold">{store.strategyConfig.numCupones}</span></div>
-                    <div className="bg-white p-2 rounded"><span className="text-slate-500">Vales:</span> <span className="font-bold">{store.strategyConfig.numVales}</span></div>
+                    <div className="bg-white p-2 rounded"><span className="text-slate-500">Cheques Regalo:</span> <span className="font-bold">{store.strategyConfig.numVales}</span></div>
                     <div className="bg-white p-2 rounded"><span className="text-slate-500">T. Sellos:</span> <span className="font-bold">{store.strategyConfig.tarjetaSellos ? 'Sí' : 'No'}</span></div>
-                    <div className="bg-white p-2 rounded"><span className="text-slate-500">T. Puntos:</span> <span className="font-bold">{store.strategyConfig.tarjetaPuntos ? 'Sí' : 'No'}</span></div>
                     <div className="bg-white p-2 rounded"><span className="text-slate-500">Categorías:</span> <span className="font-bold">{store.priceRanges.length}</span></div>
                     <div className="bg-white p-2 rounded"><span className="text-slate-500">Productos:</span> <span className="font-bold">{store.keyProducts.length}</span></div>
                     <div className="bg-white p-2 rounded"><span className="text-slate-500">Presupuesto:</span> <span className="font-bold">€{presupuestoMarketing.toFixed(0)}</span></div>
@@ -906,23 +897,14 @@ Responde SOLO con JSON válido:
                 )}
 
 
-                {/* Tarjetas Fidelidad */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {rec.tarjetaSellos && (
-                        <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
-                            <h3 className="font-bold flex items-center gap-2 mb-2">🎫 {rec.tarjetaSellos.nombre}</h3>
-                            <p className="text-sm text-slate-600">{rec.tarjetaSellos.numSellosParaPremio} sellos = {rec.tarjetaSellos.premioFinal}</p>
-                            <p className="text-xs text-blue-600 mt-1">{rec.tarjetaSellos.visibilidad} • {rec.tarjetaSellos.entrega}</p>
-                        </div>
-                    )}
-                    {rec.tarjetaPuntos && (
-                        <div className="bg-purple-50 rounded-xl p-6 border border-purple-200">
-                            <h3 className="font-bold flex items-center gap-2 mb-2">💎 {rec.tarjetaPuntos.nombre}</h3>
-                            <p className="text-sm text-slate-600">{rec.tarjetaPuntos.puntosPorEuro} punto/€ • {rec.tarjetaPuntos.puntosParaPremio} pts = {rec.tarjetaPuntos.premioFinal}</p>
-                            <p className="text-xs text-purple-600 mt-1">{rec.tarjetaPuntos.visibilidad} • {rec.tarjetaPuntos.entrega}</p>
-                        </div>
-                    )}
-                </div>
+                {/* Tarjeta Fidelidad */}
+                {rec.tarjetaSellos && (
+                    <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
+                        <h3 className="font-bold flex items-center gap-2 mb-2">🎫 {rec.tarjetaSellos.nombre}</h3>
+                        <p className="text-sm text-slate-600">{rec.tarjetaSellos.numSellosParaPremio} sellos = {rec.tarjetaSellos.premioFinal}</p>
+                        <p className="text-xs text-blue-600 mt-1">{rec.tarjetaSellos.visibilidad} • {rec.tarjetaSellos.entrega}</p>
+                    </div>
+                )}
 
                 {/* Productos */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

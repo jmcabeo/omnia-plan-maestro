@@ -97,18 +97,21 @@ export const generateMockStrategyData = (store: AppStateData): AIStrategyResult 
             }
         ],
         cupones: [
-            { id: 1, nombre: 'Happy Hour Café', descripcion: '2x1 en cafés', tipo: 'regalo', valor: '2x1', horariosValidos: 'L-M 15:00-19:00', validezDias: 30, gastoMinimo: 0, razonamiento: 'Llena horas muertas' }
+            { id: 1, nombre: 'Happy Hour Café', descripcion: '2x1 en cafés de 15:00 a 19:00', tipo: 'promocion', valor: '2x1', horariosValidos: 'L-M 15:00-19:00', validezDias: 30, gastoMinimo: 0, razonamiento: 'Promoción para llenar horas valle, sin gasto mínimo' }
         ],
         vales: [
-            { id: 1, nombre: 'Cheque Regalo 5€', valorEuros: 5, validezDias: 30, razonamiento: 'Cheque regalo sin gasto mínimo' }
+            { id: 1, nombre: 'Cheque Regalo 10€', valorEuros: 10, validezDias: 90, razonamiento: 'Tarjeta regalo para comprar online, sin gasto mínimo, como dinero en efectivo' },
+            { id: 2, nombre: 'Cheque Regalo 25€', valorEuros: 25, validezDias: 90, razonamiento: 'Tarjeta regalo premium, ideal para regalar' },
+            { id: 3, nombre: 'Cheque Regalo 50€', valorEuros: 50, validezDias: 90, razonamiento: 'Tarjeta regalo de alto valor para ocasiones especiales' }
         ],
         tarjetaSellos: config.tarjetaSellos ? { tipo: 'sellos', nombre: 'Tarjeta Menú', productoAsociado: 'Menú del día', numSellosParaPremio: 10, puntosPorEuro: 0, puntosParaPremio: 0, premioFinal: '1 Menú gratis', visibilidad: 'Solo consumidores', entrega: 'Automática', razonamiento: 'Fideliza clientes de menú' } : null,
-        tarjetaPuntos: config.tarjetaPuntos ? { tipo: 'puntos', nombre: 'Club Puntos', productoAsociado: null, numSellosParaPremio: 0, puntosPorEuro: 1, puntosParaPremio: 100, premioFinal: '5€ descuento', visibilidad: 'General', entrega: 'Camarero', razonamiento: 'Programa general de fidelización' } : null,
+        tarjetaPuntos: null,
         productosGancho: ['Café Americano', 'Cerveza Artesanal', 'Refresco'],
         productosImpulsar: ['Ensalada Gourmet', 'Sopa del Día', 'Tarta Especial'],
         roiEstimado: 3.2,
         resumenEstrategia: estrategiaResumen
     };
+
 };
 
 // Función auxiliar para generar plan de marketing Mock
