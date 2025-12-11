@@ -7,6 +7,9 @@ import DatasetBuilder from './pages/DatasetBuilder';
 
 import DataUpload from './pages/DataUpload';
 
+import ProtectedRoute from './components/ProtectedRoute';
+import Login from './pages/Login';
+
 // Temporary placeholder for Generator and Results until created
 // Temporary placeholder used for RealResults below
 const RealResults = () => <div className="p-8 text-center text-xl font-bold text-slate-500">Registro de Resultados Reales (En construcción)</div>;
@@ -17,14 +20,48 @@ function App() {
       <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
         {/* Omnia 3.0 v0.1 */}
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/config" element={<ConfigWizard />} />
-          <Route path="/upload" element={<DataUpload />} />
-          <Route path="/generator" element={<PlanIA />} /> {/* Reusing PlanIA for now as generator */}
-          <Route path="/strategy" element={<StrategyView />} />
-          <Route path="/results" element={<RealResults />} />
-          <Route path="/dataset" element={<DatasetBuilder />} />
+          <Route path="/login" element={<Login />} />
+
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/config" element={
+            <ProtectedRoute>
+              <ConfigWizard />
+            </ProtectedRoute>
+          } />
+          <Route path="/upload" element={
+            <ProtectedRoute>
+              <DataUpload />
+            </ProtectedRoute>
+          } />
+          <Route path="/generator" element={
+            <ProtectedRoute>
+              <PlanIA />
+            </ProtectedRoute>
+          } />
+          <Route path="/strategy" element={
+            <ProtectedRoute>
+              <StrategyView />
+            </ProtectedRoute>
+          } />
+          <Route path="/results" element={
+            <ProtectedRoute>
+              <RealResults />
+            </ProtectedRoute>
+          } />
+          <Route path="/dataset" element={
+            <ProtectedRoute>
+              <DatasetBuilder />
+            </ProtectedRoute>
+          } />
         </Routes>
       </div>
     </Router>

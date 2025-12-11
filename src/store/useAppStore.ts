@@ -293,6 +293,18 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
     deleteBusinessProfile: async (id: string) => {
         try {
+            // 1. Delete related strategies first (Manual Cascade)
+            const { error: stratError } = await supabase
+                .from('strategies')
+                .delete()
+                .eq('business_id', id);
+
+            if (stratError) {
+                console.warn('Error deleting related strategies:', stratError);
+                // Continue anyway, maybe there were none
+            }
+
+            // 2. Delete the business
             const { error } = await supabase
                 .from('businesses')
                 .delete()
