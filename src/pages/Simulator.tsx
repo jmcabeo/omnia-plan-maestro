@@ -197,15 +197,17 @@ Brownie Chocolate;Postres;1.50;5.00;110`;
 DATOS DEL NEGOCIO:
 - Tipo: ${store.businessType === 'horeca' ? 'Hostelería' : 'Retail'}
 - Objetivo Principal: ${{
-                captacion: 'Captación de Nuevos Clientes',
-                frecuencia: 'Frecuencia y Recurrencia',
-                ticket_medio: 'Aumento de Ticket Medio (Upselling)',
-                resenas: 'Generación de Reseñas Positivas',
-                viralidad: 'Viralidad en Redes Sociales',
-                fidelizacion: 'Fidelización a Largo Plazo',
-                horas_valle: 'Optimización de Horas Valle',
-                lanzamiento: 'Lanzamiento de Nuevos Productos'
-            }[store.objetivoPrincipal] || 'Captación'}
+                captacion_nuevos: 'Captación de Nuevos Clientes',
+                aumentar_recurrencia: 'Frecuencia y Recurrencia',
+                subir_ticket: 'Aumento de Ticket Medio (Upselling)',
+                conseguir_resenas: 'Generación de Reseñas Positivas',
+                viralidad_rrss: 'Viralidad en Redes Sociales',
+                fidelizacion_vip: 'Fidelización a Largo Plazo',
+                llenar_horas_valle: 'Optimización de Horas Valle',
+                lanzamiento_productos: 'Lanzamiento de Nuevos Productos',
+                rotar_productos: 'Rotación de Productos',
+                bajar_dependencia: 'Reducir Dependencia Personal'
+            }[store.objetivoPrincipal || 'captacion_nuevos'] || 'Captación'}
 
 - Facturación Mensual: €${store.facturacionMensual}
 - Presupuesto Marketing: €${presupuestoMarketing.toFixed(0)} (${store.presupuestoMarketingPorcentaje}%)
@@ -362,7 +364,7 @@ Responde SOLO con JSON válido (sin markdown):
         const mockStrategy = generateMockStrategyData(store);
         store.setAIRecommendation(mockStrategy);
         setStep(6);
-        alert('⚠️ Usando datos simulados (API no disponible) adaptados a tu objetivo.');
+        console.warn('⚠️ Usando datos simulados (API no disponible) adaptados a tu objetivo.');
     };
 
 
@@ -388,15 +390,17 @@ Responde SOLO con JSON válido (sin markdown):
 DATOS DEL NEGOCIO:
 - Tipo: ${store.businessType === 'horeca' ? 'Hostelería' : 'Retail'}
 - Objetivo: ${{
-                captacion: 'Captación de Nuevos Clientes',
-                frecuencia: 'Frecuencia y Recurrencia',
-                ticket_medio: 'Aumento de Ticket Medio (Upselling)',
-                resenas: 'Generación de Reseñas Positivas',
-                viralidad: 'Viralidad en Redes Sociales',
-                fidelizacion: 'Fidelización a Largo Plazo',
-                horas_valle: 'Optimización de Horas Valle',
-                lanzamiento: 'Lanzamiento de Nuevos Productos'
-            }[store.objetivoPrincipal] || 'Captación'}
+                captacion_nuevos: 'Captación de Nuevos Clientes',
+                aumentar_recurrencia: 'Frecuencia y Recurrencia',
+                subir_ticket: 'Aumento de Ticket Medio (Upselling)',
+                conseguir_resenas: 'Generación de Reseñas Positivas',
+                viralidad_rrss: 'Viralidad en Redes Sociales',
+                fidelizacion_vip: 'Fidelización a Largo Plazo',
+                llenar_horas_valle: 'Optimización de Horas Valle',
+                lanzamiento_productos: 'Lanzamiento de Nuevos Productos',
+                rotar_productos: 'Rotación de Productos',
+                bajar_dependencia: 'Reducir Dependencia Personal'
+            }[store.objetivoPrincipal || 'captacion_nuevos'] || 'Captación'}
 
 - Facturación: €${store.facturacionMensual}/mes
 - Presupuesto Marketing: €${presupuestoMarketing.toFixed(0)}/mes
@@ -740,14 +744,14 @@ Responde SOLO con JSON válido:
                     <label className="block text-sm font-bold text-slate-700 mb-3">🎯 Objetivo Principal de la Campaña</label>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         {[
-                            { id: 'captacion', label: 'Captación Nuevos', icon: '👋' },
-                            { id: 'frecuencia', label: 'Recurrencia', icon: '🔄' },
-                            { id: 'ticket_medio', label: 'Aumentar Ticket', icon: '📈' },
-                            { id: 'resenas', label: 'Conseguir Reseñas', icon: '⭐' },
-                            { id: 'viralidad', label: 'Viralidad RRSS', icon: '🚀' },
-                            { id: 'fidelizacion', label: 'Fidelización', icon: '❤️' },
-                            { id: 'horas_valle', label: 'Llenar Horas Valle', icon: '⏳' },
-                            { id: 'lanzamiento', label: 'Lanzamiento Producto', icon: '🆕' }
+                            { id: 'captacion_nuevos', label: 'Captación Nuevos', icon: '👋' },
+                            { id: 'aumentar_recurrencia', label: 'Recurrencia', icon: '🔄' },
+                            { id: 'subir_ticket', label: 'Aumentar Ticket', icon: '📈' },
+                            { id: 'conseguir_resenas', label: 'Conseguir Reseñas', icon: '⭐' },
+                            { id: 'viralidad_rrss', label: 'Viralidad RRSS', icon: '🚀' },
+                            { id: 'fidelizacion_vip', label: 'Fidelización', icon: '❤️' },
+                            { id: 'llenar_horas_valle', label: 'Llenar Horas Valle', icon: '⏳' },
+                            { id: 'lanzamiento_productos', label: 'Lanzamiento Producto', icon: '🆕' }
                         ].map(obj => (
                             <button
                                 key={obj.id}

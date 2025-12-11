@@ -1,44 +1,17 @@
 
-import type { AppStateData } from '../types/index';
-
-// Tipos para la respuesta de la IA
-export interface AIStrategyResult {
-    analisisGeneral: string;
-    juegos: any[];
-    cupones: any[];
-    vales: any[];
-    tarjetaSellos: any | null;
-    tarjetaPuntos: any | null;
-    productosGancho: string[];
-    productosImpulsar: string[];
-    roiEstimado: number;
-    resumenEstrategia: string;
-}
-
-export interface AIMarketingResult {
-    organico: {
-        posts: any[];
-        stories: any[];
-        reels: any[];
-    };
-    pago: {
-        campanas: any[];
-    };
-    acciones: string[];
-    calendarioSemanal: string;
-}
+import type { AppStateData, AIStrategyRecommendation, MarketingPlan, AIPrize } from '../types/index';
 
 // Función auxiliar para generar estrategia Mock
-export const generateMockStrategyData = (store: AppStateData): AIStrategyResult => {
-    const config = store.strategyConfig;
-    const obj = store.objetivoPrincipal;
-    const presupuestoMarketing = (store.facturacionMensual * store.presupuestoMarketingPorcentaje) / 100;
+export const generateMockStrategyData = (store: AppStateData): AIStrategyRecommendation => {
+    const config = store.strategyConfig || {};
+    const obj = store.objetivoPrincipal || 'captacion_nuevos';
+    const presupuestoMarketing = (store.facturacionMensual * (store.presupuestoMarketingPorcentaje || 5)) / 100;
 
     let estrategiaResumen = '';
-    let premiosRuleta = [];
+    let premiosRuleta: AIPrize[] = [];
 
     // Personalización según objetivo
-    if (obj === 'viralidad') {
+    if (obj === 'viralidad_rrss') {
         estrategiaResumen = 'Estrategia enfocada en MAXIMIZAR COMPARTIDOS EN REDES. La ruleta incluye premios muy visuales y "instagrameables".';
         premiosRuleta = [
             { id: 1, nombre: 'Cóctel Instagrameable', tipo: 'regalo', productoObjetivo: 'Bebidas Premium', costo: 2.50, minGasto: 10, probabilidad: 20, razonamiento: 'Muy visual para stories' },
@@ -49,7 +22,7 @@ export const generateMockStrategyData = (store: AppStateData): AIStrategyResult 
             { id: 6, nombre: '10% si subes Story', tipo: 'descuento', productoObjetivo: 'Total', costo: 1.50, minGasto: 10, probabilidad: 10, razonamiento: 'Incentivo directo a compartir' },
             { id: 7, nombre: 'Cena para 2', tipo: 'regalo', productoObjetivo: 'Menú Degustación', costo: 20.00, minGasto: 50, probabilidad: 5, razonamiento: 'Gran premio viral' }
         ];
-    } else if (obj === 'resenas') {
+    } else if (obj === 'conseguir_resenas') {
         estrategiaResumen = 'Estrategia enfocada en REPUTACIÓN ONLINE. Premios diseñados para incentivar la satisfacción y el feedback positivo.';
         premiosRuleta = [
             { id: 1, nombre: 'Café Gratis', tipo: 'regalo', productoObjetivo: 'Café', costo: 0.50, minGasto: 5, probabilidad: 30, razonamiento: 'Detalle rápido de agradecimiento' },
@@ -60,7 +33,7 @@ export const generateMockStrategyData = (store: AppStateData): AIStrategyResult 
             { id: 6, nombre: '15% Descuento', tipo: 'descuento', productoObjetivo: 'Total', costo: 2.50, minGasto: 30, probabilidad: 8, razonamiento: 'Gran incentivo' },
             { id: 7, nombre: 'Menú Degustación', tipo: 'regalo', productoObjetivo: 'Menú', costo: 15.00, minGasto: 40, probabilidad: 2, razonamiento: 'Premio estrella' }
         ];
-    } else if (obj === 'ticket_medio') {
+    } else if (obj === 'subir_ticket') {
         estrategiaResumen = 'Estrategia de UPSELLING agresivo. Premios con gastos mínimos escalonados para subir el ticket promedio.';
         premiosRuleta = [
             { id: 1, nombre: '2x1 Entrantes', tipo: '2x1', productoObjetivo: 'Entrantes', costo: 2.00, minGasto: 15, probabilidad: 25, razonamiento: 'Fuerza a pedir entrante' },
@@ -85,41 +58,107 @@ export const generateMockStrategyData = (store: AppStateData): AIStrategyResult 
         ];
     }
 
+    // 1. INYECTAR REALIDAD (Override Mock Data if available)
+    let computedTicket = store.ticketPromedio;
+    let computedRevenue = store.facturacionMensual;
+    let computedBestSellers = ['Bebidas', 'Postres']; // Fallback
+    let realDataUsed = false;
+
+    // A. Analizar Tickets Reales
+    if (store.ticketsDiarios && store.ticketsDiarios.length > 0) {
+        const totalSales = store.ticketsDiarios.reduce((acc, t) => acc + t.total, 0);
+        computedTicket = totalSales / store.ticketsDiarios.length;
+        computedRevenue = totalSales; // Assuming the CSV is one month, simplified
+        realDataUsed = true;
+    }
+
+    // B. Analizar Productos Reales
+    const importedProducts = store.products.filter(p => p.salesMonthly > 0);
+    if (importedProducts.length > 0) {
+        // Sort by sales
+        const sorted = [...importedProducts].sort((a, b) => b.salesMonthly - a.salesMonthly);
+        computedBestSellers = sorted.slice(0, 3).map(p => p.name);
+    }
+
+    // Recalculate Budget based on Real Revenue
+    const presupuestoMarketingReal = (computedRevenue * (store.presupuestoMarketingPorcentaje || 5)) / 100;
+
     return {
-        analisisGeneral: `Estrategia diseñada para objetivo: ${obj.toUpperCase()}. Ticket medio actual €${store.ticketPromedio}. Presupuesto €${presupuestoMarketing.toFixed(0)}.`,
+        analisisGeneral: realDataUsed
+            ? `ANÁLISIS DE DATOS REALES: Se han procesado ${store.ticketsDiarios?.length} tickets. Ticket medio real auditado: €${computedTicket.toFixed(2)} (vs €${store.ticketPromedio} estimado).`
+            : `Estrategia diseñada para objetivo: ${obj.toUpperCase()}. Ticket medio declarado €${store.ticketPromedio}. Presupuesto €${presupuestoMarketingReal.toFixed(0)}.`,
+
+        // Added required fields
+        puntosFuertes: ['Buena ubicación', 'Personal amable', 'Producto de calidad'],
+        puntosDebiles: ['Poca visibilidad online', 'Horas valle vacías'],
+        riesgos: ['Competencia cercana agresiva', 'Dependencia del turismo'],
+        oportunidades: ['Crear base de datos de clientes', 'Potenciar el delivery', 'Eventos temáticos'],
+
         juegos: [
             {
                 id: 1, tipo: 'bienvenida', nombre: 'Ruleta Estratégica', mecanica: 'Ruleta',
-                ubicacion: 'Mesa/Directorio/RRSS', siempreGana: true, gastoMinimo: config.gastoMinBienvenida,
+                ubicacion: 'Mesa/Directorio/RRSS', siempreGana: true, gastoMinimo: config.gastoMinBienvenida || 0,
                 canjeProximaVisita: true,
                 premios: premiosRuleta,
                 razonamiento: estrategiaResumen
             }
         ],
+        estrategiaEconomica: {
+            subidaTicket: 'Fomentar el upsell de postres y bebidas premium para aumentar el ticket medio un 15%.',
+            proteccionMargen: 'Priorizar la venta de productos con bajo coste de materia prima (café, pasta) en las promociones.',
+            evitarSaturacion: 'Promociones válidas solo en días de baja afluencia para no canibalizar ventas orgánicas.',
+            impactoFinanciero: 'Se estima un incremento del 12% en el beneficio neto mensual gracias a la optimización de márgenes.'
+        },
+        horasValle: {
+            misiones: ['Visita en martes', 'Desayuno tardío'],
+            promociones: ['2x1 Café 16:00-18:00', 'Postre regalo cenando pronto'],
+            antiPico: ['No válido viernes noche', 'Reserva previa obligatoria']
+        },
+        captacion: {
+            organico: {
+                posts: [{ idea: 'Plato del día', copy: '¡Prueba nuestro nuevo plato!', creativoSugerido: 'Foto alta calidad' }],
+                stories: [{ idea: 'Entra en cocina', copy: 'Así preparamos tu cena' }],
+                reels: [{ idea: 'ASMR Comida', guion: 'Sonidos de crujiente' }]
+            },
+            pago: {
+                campanas: [{ objetivo: 'Tráfico local', segmentacion: 'Radio 2km', copy: '¿Hambre?', creativoSugerido: 'Foto Burger', presupuestoSugerido: '5€/día' }]
+            },
+            acciones: ['Colaboración con influencers locales', 'Evento de cata'],
+            calendarioSemanal: 'L: Post motivacional, X: Plato estrella, V: Agenda fin de semana'
+        },
+        fidelizacion: {
+            niveles: ['Bronce', 'Plata', 'Oro'],
+            misiones: ['Ven 3 veces este mes', 'Prueba 2 postres diferentes'],
+            recompensasVIP: ['Mesa preferente', 'Invitación a eventos exclusivos']
+        },
+        // Legacy props at root for compatibility if needed (but now optional in interface)
         cupones: [
-            { id: 1, nombre: 'Happy Hour Café', descripcion: '2x1 en cafés de 15:00 a 19:00', tipo: 'promocion', valor: '2x1', horariosValidos: 'L-M 15:00-19:00', validezDias: 30, gastoMinimo: 0, razonamiento: 'Promoción para llenar horas valle, sin gasto mínimo' }
+            { id: 1, nombre: 'Happy Hour Café', descripcion: '2x1 en cafés de 15:00 a 19:00', tipo: '2x1', valor: '2x1', horariosValidos: 'L-M 15:00-19:00', validezDias: 30, gastoMinimo: 0, razonamiento: 'Llenar horas valle' }
         ],
         vales: [
-            { id: 1, nombre: 'Cheque Regalo 10€', valorEuros: 10, validezDias: 90, razonamiento: 'Tarjeta regalo para comprar online, sin gasto mínimo, como dinero en efectivo' },
-            { id: 2, nombre: 'Cheque Regalo 25€', valorEuros: 25, validezDias: 90, razonamiento: 'Tarjeta regalo premium, ideal para regalar' },
-            { id: 3, nombre: 'Cheque Regalo 50€', valorEuros: 50, validezDias: 90, razonamiento: 'Tarjeta regalo de alto valor para ocasiones especiales' }
+            { id: 1, nombre: 'Cheque Regalo 10€', valorEuros: 10, validezDias: 90, razonamiento: 'Regalo flexible' }
         ],
-        tarjetaSellos: config.tarjetaSellos ? { tipo: 'sellos', nombre: 'Tarjeta Menú', productoAsociado: 'Menú del día', numSellosParaPremio: 10, puntosPorEuro: 0, puntosParaPremio: 0, premioFinal: '1 Menú gratis', visibilidad: 'Solo consumidores', entrega: 'Automática', razonamiento: 'Fideliza clientes de menú' } : null,
-        tarjetaPuntos: null,
-        productosGancho: ['Café Americano', 'Cerveza Artesanal', 'Refresco'],
-        productosImpulsar: ['Ensalada Gourmet', 'Sopa del Día', 'Tarta Especial'],
-        roiEstimado: 3.2,
+        tarjetaSellos: config.tarjetaSellos ? { tipo: 'sellos', nombre: 'Tarjeta Menú', productoAsociado: 'Menú del día', numSellosParaPremio: 10, puntosPorEuro: 0, puntosParaPremio: 0, visibilidad: 'app', entrega: 'al pagar', premioFinal: '1 Menú gratis', razonamiento: 'Fidelización diaria' } : null,
+
+        automatizaciones: [
+            'Email de bienvenida al registrarse en Wifi',
+            'SMS con descuento por cumpleaños',
+            'Notificación push si no visita en 30 días'
+        ],
+        // productosGancho & productosImpulsar are NOT in AIStrategyRecommendation but were in old Result. 
+        // We can keep them if we want, but they are not in the Interface. 
+        // Just in case, I'll remove them or ignore them since interface doesn't have them.
         resumenEstrategia: estrategiaResumen
     };
 
 };
 
 // Función auxiliar para generar plan de marketing Mock
-export const generateMockMarketingPlan = (store: AppStateData): AIMarketingResult => {
-    const obj = store.objetivoPrincipal;
+export const generateMockMarketingPlan = (store: AppStateData): MarketingPlan => {
+    const obj = store.objetivoPrincipal || 'captacion_nuevos';
     let posts = [], stories = [], reels = [], campanas = [];
 
-    if (obj === 'viralidad') {
+    if (obj === 'viralidad_rrss') {
         posts = [
             { idea: '📸 Concurso Foto Más Original', copy: '¡Sube tu foto más creativa con nuestro plato estrella y GANA una cena para 2! 🎁 Usa #OmniaExperience y etiquétanos. ¡El más original gana! 🏆', creativoSugerido: 'Collage de fotos de clientes divirtiéndose', mejorDia: 'Viernes 18:00' },
             { idea: '👯 Etiqueta a tu Partner in Crime', copy: '¿Con quién compartirías este postre? 🍰 Etiqueta a esa persona y si responde en 5 min... ¡te debe una cena! 😉', creativoSugerido: 'Video partiendo un postre con chocolate cayendo', mejorDia: 'Miércoles 20:00' }
@@ -135,7 +174,7 @@ export const generateMockMarketingPlan = (store: AppStateData): AIMarketingResul
         campanas = [
             { objetivo: 'Alcance Viral', segmentacion: 'Amigos de seguidores, 18-35 años', copy: '🔥 Lo que todo el mundo está compartiendo. ¿Te lo vas a perder?', creativoSugerido: 'Video con cortes rápidos y música tendencia', presupuestoSugerido: '€20/día' }
         ];
-    } else if (obj === 'resenas') {
+    } else if (obj === 'conseguir_resenas') {
         posts = [
             { idea: '⭐ Tu Opinión nos Importa', copy: 'Gracias a clientes como María por sus palabras ❤️ "El mejor servicio de la ciudad". ¿Y tú, qué opinas de nosotros? Déjanos tu review y recibe una sorpresa 🎁', creativoSugerido: 'Diseño elegante con la reseña destacada', mejorDia: 'Martes 10:00' },
             { idea: '🏆 Empleado del Mes', copy: '¡Felicidades a Juan! 👏👏 Mencionado en 15 reseñas este mes por su amabilidad. Ven a saludarle y comprueba por qué es el favorito.', creativoSugerido: 'Foto del empleado sonriendo', mejorDia: 'Jueves 12:00' }

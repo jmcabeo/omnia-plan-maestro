@@ -1,7 +1,7 @@
-export type BusinessType = 'horeca' | 'retail';
-export type ObjectiveType = 'captacion' | 'frecuencia' | 'ticket_medio' | 'resenas' | 'viralidad' | 'fidelizacion' | 'horas_valle' | 'lanzamiento';
+export type BusinessType = 'horeca' | 'retail' | 'servicios' | 'estetica' | 'salud';
+export type ObjectiveType = 'subir_ticket' | 'aumentar_recurrencia' | 'llenar_horas_valle' | 'captacion_nuevos' | 'rotar_productos' | 'bajar_dependencia' | 'fidelizacion_vip' | 'conseguir_resenas' | 'viralidad_rrss' | 'lanzamiento_productos';
 export type ValidityType = 'semana' | 'finde' | 'todo';
-export type GameId = 'spin' | 'scratch' | 'slot' | 'memory';
+export type GameId = 'ruleta' | 'rasca' | 'puzzle' | 'memorama' | 'cazar_objetos';
 export type DataCollectionLevel = 'none' | 'basic' | 'complete';
 export type ValidationMethod = 'screen' | 'qr_secure' | 'stamp';
 export type AutomationFlowType = 'nurture' | 'review' | 'birthday';
@@ -9,9 +9,15 @@ export type AutomationFlowType = 'nurture' | 'review' | 'birthday';
 export interface Product {
     id: number;
     name: string;
+    category: string;
     cost: number;
     price: number;
-    sales: number;
+    margin: number;
+    salesMonthly: number;
+    prepTimeMinutes?: number;
+    isCriticalMachine?: boolean;
+    canBePrize?: boolean;
+    priority?: 'alta' | 'media' | 'baja';
 }
 
 // Types for AI Strategy System
@@ -29,37 +35,73 @@ export interface PriceRange {
     margenPromedio: number;
 }
 
-export interface KeyProduct {
-    id: number;
-    nombre: string;
-    categoria: string;
-    costo: number;
-    precioVenta: number;
-    ventasMensuales: number;
-    margen: number;
+export interface KeyProduct extends Product {
     tipo: ProductType;
     posicionRanking: number;
+    // Spanish aliases for Simulator
+    precioVenta?: number;
+    ventasMensuales?: number;
+    margen?: number;
+    costo?: number;
 }
 
-// Horarios del negocio
+// Horarios y Capacidad
 export interface BusinessSchedule {
-    diasFlojos: string[];
-    horasFlojas: string;
-    diasLlenos: string[];
-    horasLlenas: string;
+    diasPico: string[]; // ['Viernes', 'Sábado']
+    horasPico: string[]; // ['14:00-16:00', '21:00-23:00']
+    diasValle: string[];
+    horasValle: string[];
+    diasCerrado: string[];
 }
 
-// Configuración de estrategia
-export interface StrategyConfig {
-    numJuegos: number;
-    numCupones: number;
-    numVales: number;
-    tarjetaSellos: boolean;
-    tarjetaPuntos: boolean;
-    validezCuponesDias: number;
-    gastoMinBienvenida: number;
-    gastoMinTicketQR: number;
+export interface BusinessConstraints {
+    maxDiscount: number; // e.g., 15 (percent)
+    minMargin: number; // e.g., 50 (percent)
+    forbiddenDays: string[]; // Days where no promos should run
+    blacklistedProducts: number[]; // IDs of products to never discount
+    adBudgetDaily: number;
 }
+
+// Operational Capacity
+export interface OperationalCapacity {
+    // Restaurante
+    numMesas?: number;
+    personalCocina?: number;
+    personalSala?: number;
+    hornoLimitado?: boolean;
+    freidorasLimitadas?: boolean;
+    tiempoMedioPlato?: number;
+
+    // Citas/Servicios
+    numProfesionales?: number;
+    serviciosSimultaneos?: number;
+    maquinasCriticas?: number;
+    porcentajeOcupacion?: number; // Estimated %
+
+    // Schedule
+    horarios: BusinessSchedule;
+}
+
+// New: Marketing Profile
+export interface MarketingProfile {
+    // Redes
+    instagram: boolean;
+    facebook: boolean;
+    tiktok: boolean;
+    google: boolean;
+    email: boolean;
+    whatsapp: boolean;
+
+    // Ads
+    adsActivas?: boolean;
+    presupuestoDiario?: number;
+    razonamiento: string;
+    clasificacion: 'exito' | 'fracaso' | 'neutro';
+    aptoParaTuning: boolean;
+    anadido: boolean;
+}
+
+// --- AI OUTPUT TYPES (Existing + Updated) ---
 
 // Premio individual (7 por juego)
 export interface AIPrize {
@@ -147,59 +189,154 @@ export interface MarketingPlan {
 
 // Recomendación completa de IA
 export interface AIStrategyRecommendation {
-    analisisGeneral: string;
-    juegos: GameRecommendation[];
-    cupones: CouponRecommendation[];
-    vales: VoucherRecommendation[];
-    tarjetaSellos: LoyaltyCardRecommendation | null;
-    tarjetaPuntos: LoyaltyCardRecommendation | null;
-    productosGancho: string[];
-    productosImpulsar: string[];
-    roiEstimado: number;
-    resumenEstrategia: string;
+    analisisGeneral: string; // Tab 1: Diagnóstico
+    puntosFuertes: string[];
+    puntosDebiles: string[];
+    riesgos: string[];
+    oportunidades: string[];
+
+    juegos: GameRecommendation[]; // Tab 2
+
+    estrategiaEconomica: { // Tab 3
+        subidaTicket: string;
+        proteccionMargen: string;
+        evitarSaturacion: string;
+        impactoFinanciero: string;
+    };
+
+    horasValle: { // Tab 4
+        misiones: string[];
+        promociones: string[];
+        antiPico: string[];
+    };
+
+    captacion: MarketingPlan; // Tab 5
+
+    fidelizacion: { // Tab 6
+        niveles: string[];
+        misiones: string[];
+        recompensasVIP: string[];
+    };
+
+    automatizaciones: string[]; // Tab 7
+
+    cupones?: CouponRecommendation[]; // Legacy support or specifics
+    vales?: VoucherRecommendation[];
+    tarjetaSellos?: LoyaltyCardRecommendation | null;
+    tarjetaPuntos?: LoyaltyCardRecommendation | null;
+    resumenEstrategia?: string;
+}
+
+// Configuración de Estrategia (Inputs para IA)
+export interface StrategyConfig {
+    juegosActivos: string[];
+    numJuegos: number;
+    numCupones: number;
+    numVales: number;
+    tarjetaSellos: boolean;
+    tarjetaPuntos: boolean;
+    validezCuponesDias: number;
+    gastoMinBienvenida: number;
+    gastoMinTicketQR: number;
+    // Legacy support fields
+    objetivoPrincipal?: ObjectiveType;
+    presupuestoMarketing?: number;
+}
+
+// Resultados Reales (New Section)
+export interface RealResults {
+    fechaRegistro: string;
+    ticketMedioAntes: number;
+    ticketMedioDespues: number;
+    clientesTotales: number;
+    clientesRecurrentes: number;
+    nuevosClientes: number;
+    ventasTotales: number;
+    costoMarketing: number;
+    ROI: number;
+    satisfaccionCliente?: number; // 0-10
+}
+
+// Dataset Entry (For Training)
+export interface DatasetEntry {
+    id: string;
+    date: string;
+
+    // INPUTS
+    businessProfile: {
+        type: BusinessType;
+        avgTicket: number;
+        monthlyRevenue: number;
+        location: string;
+    };
+
+    // OUTPUT
+    generatedStrategy: {
+        summary: string;
+        keyActions: string[];
+    };
+
+    // RESULT (Label)
+    realOutcome?: RealResults;
+    classification?: 'exito' | 'fracaso' | 'neutro';
 }
 
 export interface AppStateData {
-    // Perfil Negocio
+    // 1. Perfil Negocio
+    nombreNegocio: string;
+    ciudad: string;
     businessType: BusinessType;
-    ticketPromedio: number;
-    comensalesMesa: number;
-    margenPromedio: number;
-    traficoMensual: number;
-    inversionInvertir: number;
-    products: Product[];
 
-    // Presupuesto Marketing
+    // 2. Objetivos
+    objetivos: ObjectiveType[];
+    objetivoPrincipal?: ObjectiveType; // Restored for compatibility
+    objetivosComentario: string;
+
+    // 3. Datos Económicos
     facturacionMensual: number;
-    presupuestoMarketingPorcentaje: number;
+    ticketPromedio: number;
+    ticketsMensuales: number;
+    // New: Real Data Parsing
+    ticketsDiarios?: { id: string, fecha: string, total: number, items: number }[];
+    promotionsData?: { idPromo: string, nombre: string, canjes: number, descuentoTotal: number }[];
 
-    // Estrategia
-    objetivoPrincipal: ObjectiveType;
-    diasValidez: ValidityType;
+    // 4. Capacidad Operativa
+    capacidad: OperationalCapacity;
 
-    // Configuración Avanzada
-    dataCollection: DataCollectionLevel;
-    validationMethod: ValidationMethod;
+    // 5. Productos / Servicios
+    products: Product[]; // Detailed products
 
-    // Data Upload State
-    uploadedFiles: Record<string, boolean>;
+    // 6. Marketing Actual
+    marketing: MarketingProfile;
 
-    // AI-First Strategy
-    priceRanges: PriceRange[];
-    keyProducts: KeyProduct[];
-    allProducts: KeyProduct[];  // TODOS los productos importados del Excel
-
-    // Horarios del negocio
-    businessSchedule: BusinessSchedule;
-
-    // Configuración de estrategia
+    // 7. Configuración Juegos
     strategyConfig: StrategyConfig;
 
-    // Resultados IA
-    aiRecommendation: AIStrategyRecommendation | null;
-    marketingPlan: MarketingPlan | null;
-}
+    // 8. Restrictions
+    constraints: BusinessConstraints;
 
+    // --- Legacy / Internal use ---
+    traficoMensual: number; // Derived or same as ticketsMensuales
+    presupuestoMarketingPorcentaje: number;
+    diasValidez: ValidityType;
+    dataCollection: DataCollectionLevel;
+    validationMethod: ValidationMethod;
+    uploadedFiles: Record<string, boolean>;
+    priceRanges: PriceRange[];
+    keyProducts: KeyProduct[];
+    allProducts: any[]; // New field for raw excel products
+    marketingPlan?: MarketingPlan; // Restored
+    businessSchedule: BusinessSchedule; // Restored (singular definition)
+    aiRecommendation?: AIStrategyRecommendation | null; // Restored
+    comensalesMesa?: number; // Restored
+    margenPromedio?: number; // Restored
+
+    // Resultados IA - defined above
+
+    // Dataset Management
+    datasetEntries: DatasetEntry[];
+    currentRealResults: RealResults | null;
+}
 
 export interface SimulationResults {
     ticketBaseReal: number;

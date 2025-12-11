@@ -1,24 +1,33 @@
-
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import DashboardLayout from './layouts/DashboardLayout';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
+import ConfigWizard from './pages/ConfigWizard';
+import PlanIA from './pages/PlanIA'; // We can adapt this later or keep it as the generator
+import StrategyView from './pages/StrategyView';
+import DatasetBuilder from './pages/DatasetBuilder';
+
 import DataUpload from './pages/DataUpload';
-import Simulator from './pages/Simulator';
-import PlanIA from './pages/PlanIA';
+
+// Temporary placeholder for Generator and Results until created
+const StrategyGenerator = () => <div className="p-8 text-center text-xl font-bold text-slate-500">Generador de Estrategia Omnia (En construcción) - Integrará PlanIA logic</div>;
+const RealResults = () => <div className="p-8 text-center text-xl font-bold text-slate-500">Registro de Resultados Reales (En construcción)</div>;
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<DashboardLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="upload" element={<DataUpload />} />
-          <Route path="simulator" element={<Simulator />} />
-          <Route path="plan" element={<PlanIA />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <Router>
+      <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+        {/* Omnia 3.0 v0.1 */}
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/config" element={<ConfigWizard />} />
+          <Route path="/upload" element={<DataUpload />} />
+          <Route path="/generator" element={<PlanIA />} /> {/* Reusing PlanIA for now as generator */}
+          <Route path="/strategy" element={<StrategyView />} />
+          <Route path="/results" element={<RealResults />} />
+          <Route path="/dataset" element={<DatasetBuilder />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

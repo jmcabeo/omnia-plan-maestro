@@ -58,7 +58,9 @@ Los archivos optimizados se generarán en la carpeta `dist/`
 ## 📝 Uso
 
 1. **Perfil del Negocio**: Define tipo de negocio y métricas base
-2. **Catálogo de Productos**: Añade tus productos clave
+2. **Catálogo de Productos**: 
+   - Añade manualmente
+   - **Importa CSV/Excel** (Formato: `Nombre; Precio; Costo`)
 3. **Estrategia**: Configura gamificación y automatización
 4. **Premios**: Define incentivos y probabilidades
 5. **Dashboard**: Visualiza ROI y métricas proyectadas
