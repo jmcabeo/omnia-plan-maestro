@@ -122,7 +122,7 @@ Brownie Chocolate;Postres;1.50;5.00;110`;
                     tipo: 'top_ventas' as const,
                     posicionRanking: idx + 1
                 };
-            }).filter(p => p.nombre && p.costo > 0 && p.precioVenta > 0);
+            }).filter((p: any) => p.nombre && p.costo > 0 && p.precioVenta > 0);
 
             if (productos.length === 0) {
                 alert('No se encontraron productos válidos en el archivo');
@@ -190,7 +190,7 @@ Brownie Chocolate;Postres;1.50;5.00;110`;
         }
 
         const config = store.strategyConfig;
-        const schedule = store.businessSchedule;
+        const schedule: any = store.businessSchedule;
 
         const prompt = `Actúa como Consultor de Marketing Estratégico experto en gamificación y fidelización para hostelería/retail.
 
@@ -239,12 +239,12 @@ RANGOS DE PRECIO (${store.priceRanges.length} categorías):
 ${store.priceRanges.map(r => `- ${r.nombre}: €${r.costoPromedio} costo, €${r.precioVentaPromedio} venta, ${r.ventasMensuales} ventas/mes (${r.margenPromedio.toFixed(1)}% margen)`).join('\n')}
 
 ${store.allProducts.length > 0 ? `TODOS LOS PRODUCTOS (${store.allProducts.length} productos):
-${store.allProducts.slice(0, 50).map((p, i) => `${i + 1}. ${p.nombre} (${p.categoria}): ${p.ventasMensuales} ventas/mes, €${p.precioVenta}, costo €${p.costo}, ${p.margen.toFixed(1)}% margen`).join('\n')}
+${store.allProducts.slice(0, 50).map((p, i) => `${i + 1}. ${p.nombre} (${p.categoria}): ${p.ventasMensuales} ventas/mes, €${p.precioVenta}, costo €${p.costo}, ${(p.margen || 0).toFixed(1)}% margen`).join('\n')}
 ${store.allProducts.length > 50 ? `... y ${store.allProducts.length - 50} productos más` : ''}` : `TOP 10 PRODUCTOS MÁS VENDIDOS:
-${store.keyProducts.filter(p => p.tipo === 'top_ventas').map((p, i) => `${i + 1}. ${p.nombre} (${p.categoria}): ${p.ventasMensuales} ventas/mes, €${p.precioVenta}, ${p.margen.toFixed(1)}% margen`).join('\n')}
+${store.keyProducts.filter(p => p.tipo === 'top_ventas').map((p, i) => `${i + 1}. ${p.nombre} (${p.categoria}): ${p.ventasMensuales} ventas/mes, €${p.precioVenta}, ${(p.margen || p.margin || 0).toFixed(1)}% margen`).join('\n')}
 
 TOP 10 PRODUCTOS PEOR VENTA:
-${store.keyProducts.filter(p => p.tipo === 'bajo_ventas').map((p, i) => `${i + 1}. ${p.nombre} (${p.categoria}): ${p.ventasMensuales} ventas/mes, €${p.precioVenta}, ${p.margen.toFixed(1)}% margen`).join('\n')}`}
+${store.keyProducts.filter(p => p.tipo === 'bajo_ventas').map((p, i) => `${i + 1}. ${p.nombre} (${p.categoria}): ${p.ventasMensuales} ventas/mes, €${p.precioVenta}, ${(p.margen || p.margin || 0).toFixed(1)}% margen`).join('\n')}`}
 
 
 REGLAS DE LA ESTRATEGIA:
@@ -384,7 +384,7 @@ Responde SOLO con JSON válido (sin markdown):
             return;
         }
 
-        const schedule = store.businessSchedule;
+        const schedule: any = store.businessSchedule;
         const prompt = `Actúa como Experto en Marketing Digital para ${store.businessType === 'horeca' ? 'Hostelería' : 'Retail'}.
 
 DATOS DEL NEGOCIO:
@@ -532,10 +532,10 @@ Responde SOLO con JSON válido:
                         <div className="flex flex-wrap gap-2">
                             {DIAS_SEMANA.map(dia => (
                                 <button key={dia} onClick={() => {
-                                    const current = store.businessSchedule.diasFlojos;
-                                    const updated = current.includes(dia) ? current.filter(d => d !== dia) : [...current, dia];
+                                    const current = (store.businessSchedule as any).diasFlojos || [];
+                                    const updated = current.includes(dia) ? current.filter((d: any) => d !== dia) : [...current, dia];
                                     store.updateSchedule('diasFlojos', updated);
-                                }} className={`px-3 py-1 rounded-full text-xs font-medium transition ${store.businessSchedule.diasFlojos.includes(dia) ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                                }} className={`px-3 py-1 rounded-full text-xs font-medium transition ${(store.businessSchedule as any).diasFlojos?.includes(dia) ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                                     {dia.substring(0, 3)}
                                 </button>
                             ))}
@@ -547,10 +547,10 @@ Responde SOLO con JSON válido:
                         <div className="flex flex-wrap gap-2">
                             {DIAS_SEMANA.map(dia => (
                                 <button key={dia} onClick={() => {
-                                    const current = store.businessSchedule.diasLlenos;
-                                    const updated = current.includes(dia) ? current.filter(d => d !== dia) : [...current, dia];
+                                    const current = (store.businessSchedule as any).diasLlenos || [];
+                                    const updated = current.includes(dia) ? current.filter((d: any) => d !== dia) : [...current, dia];
                                     store.updateSchedule('diasLlenos', updated);
-                                }} className={`px-3 py-1 rounded-full text-xs font-medium transition ${store.businessSchedule.diasLlenos.includes(dia) ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                                }} className={`px-3 py-1 rounded-full text-xs font-medium transition ${(store.businessSchedule as any).diasLlenos?.includes(dia) ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                                     {dia.substring(0, 3)}
                                 </button>
                             ))}
@@ -657,7 +657,7 @@ Responde SOLO con JSON válido:
                         <input type="number" step="0.1" className="w-1/8 text-sm p-2 border rounded" value={p.costo} onChange={e => store.updateKeyProduct(p.id, 'costo', parseFloat(e.target.value) || 0)} />
                         <input type="number" step="0.1" className="w-1/8 text-sm p-2 border rounded" value={p.precioVenta} onChange={e => store.updateKeyProduct(p.id, 'precioVenta', parseFloat(e.target.value) || 0)} />
                         <input type="number" className="w-1/8 text-sm p-2 border rounded" value={p.ventasMensuales} onChange={e => store.updateKeyProduct(p.id, 'ventasMensuales', parseInt(e.target.value) || 0)} />
-                        <span className="text-xs font-bold text-green-600">{p.margen.toFixed(1)}%</span>
+                        <span className="text-xs font-bold text-green-600">{(p.margen || p.margin || 0).toFixed(1)}%</span>
                         <button onClick={() => store.removeKeyProduct(p.id)} className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
                     </div>
                 ))}
@@ -680,7 +680,7 @@ Responde SOLO con JSON válido:
                         <input type="number" step="0.1" className="w-1/8 text-sm p-2 border rounded" value={p.costo} onChange={e => store.updateKeyProduct(p.id, 'costo', parseFloat(e.target.value) || 0)} />
                         <input type="number" step="0.1" className="w-1/8 text-sm p-2 border rounded" value={p.precioVenta} onChange={e => store.updateKeyProduct(p.id, 'precioVenta', parseFloat(e.target.value) || 0)} />
                         <input type="number" className="w-1/8 text-sm p-2 border rounded" value={p.ventasMensuales} onChange={e => store.updateKeyProduct(p.id, 'ventasMensuales', parseInt(e.target.value) || 0)} />
-                        <span className="text-xs font-bold text-green-600">{p.margen.toFixed(1)}%</span>
+                        <span className="text-xs font-bold text-green-600">{(p.margen || p.margin || 0).toFixed(1)}%</span>
                         <button onClick={() => store.removeKeyProduct(p.id)} className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
                     </div>
                 ))}
@@ -983,11 +983,11 @@ Responde SOLO con JSON válido:
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="bg-emerald-50 rounded-lg p-4">
                         <h4 className="font-bold text-emerald-700 mb-2">🎣 Productos Gancho</h4>
-                        <ul className="text-sm">{rec.productosGancho.map((p, i) => <li key={i} className="py-1">• {p}</li>)}</ul>
+                        <ul className="text-sm">{(rec.productosGancho || []).map((p: any, i: any) => <li key={i} className="py-1">• {p}</li>)}</ul>
                     </div>
                     <div className="bg-orange-50 rounded-lg p-4">
                         <h4 className="font-bold text-orange-700 mb-2">📈 Productos a Impulsar</h4>
-                        <ul className="text-sm">{rec.productosImpulsar.map((p, i) => <li key={i} className="py-1">• {p}</li>)}</ul>
+                        <ul className="text-sm">{(rec.productosImpulsar || []).map((p: any, i: any) => <li key={i} className="py-1">• {p}</li>)}</ul>
                     </div>
                 </div>
 

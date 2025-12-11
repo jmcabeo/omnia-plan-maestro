@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
-import { supabase } from '../lib/supabase';
+// import { supabase } from '../lib/supabase'; // Unused
 import { Sparkles, Megaphone, Loader2, AlertTriangle, ChevronLeft } from 'lucide-react';
 
 export default function PlanIA() {

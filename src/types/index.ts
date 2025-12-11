@@ -43,6 +43,8 @@ export interface KeyProduct extends Product {
     ventasMensuales?: number;
     margen?: number;
     costo?: number;
+    nombre?: string;
+    categoria?: string;
 }
 
 // Horarios y Capacidad
@@ -52,6 +54,11 @@ export interface BusinessSchedule {
     diasValle: string[];
     horasValle: string[];
     diasCerrado: string[];
+    // Aliases
+    diasLlenos?: string[];
+    horasLlenas?: string;
+    diasFlojos?: string[];
+    horasFlojas?: string;
 }
 
 export interface BusinessConstraints {
@@ -225,6 +232,10 @@ export interface AIStrategyRecommendation {
     tarjetaSellos?: LoyaltyCardRecommendation | null;
     tarjetaPuntos?: LoyaltyCardRecommendation | null;
     resumenEstrategia?: string;
+    // Legacy / Simulator fields
+    roiEstimado?: number;
+    productosGancho?: string[];
+    productosImpulsar?: string[];
 }
 
 // Configuración de Estrategia (Inputs para IA)
@@ -328,8 +339,8 @@ export interface AppStateData {
     marketingPlan?: MarketingPlan; // Restored
     businessSchedule: BusinessSchedule; // Restored (singular definition)
     aiRecommendation?: AIStrategyRecommendation | null; // Restored
-    comensalesMesa?: number; // Restored
-    margenPromedio?: number; // Restored
+    comensalesMesa: number; // Restored
+    margenPromedio: number; // Restored
 
     // Resultados IA - defined above
 

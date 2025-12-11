@@ -5,7 +5,7 @@ import type { AppStateData, AIStrategyRecommendation, MarketingPlan, AIPrize } f
 export const generateMockStrategyData = (store: AppStateData): AIStrategyRecommendation => {
     const config = store.strategyConfig || {};
     const obj = store.objetivoPrincipal || 'captacion_nuevos';
-    const presupuestoMarketing = (store.facturacionMensual * (store.presupuestoMarketingPorcentaje || 5)) / 100;
+    // Removed unused presupuestoMarketing
 
     let estrategiaResumen = '';
     let premiosRuleta: AIPrize[] = [];
@@ -85,7 +85,7 @@ export const generateMockStrategyData = (store: AppStateData): AIStrategyRecomme
 
     return {
         analisisGeneral: realDataUsed
-            ? `ANÁLISIS DE DATOS REALES: Se han procesado ${store.ticketsDiarios?.length} tickets. Ticket medio real auditado: €${computedTicket.toFixed(2)} (vs €${store.ticketPromedio} estimado).`
+            ? `ANÁLISIS DE DATOS REALES: Se han procesado ${store.ticketsDiarios?.length} tickets. Ticket medio real auditado: €${computedTicket.toFixed(2)}. Top Ventas: ${computedBestSellers.join(', ')}.`
             : `Estrategia diseñada para objetivo: ${obj.toUpperCase()}. Ticket medio declarado €${store.ticketPromedio}. Presupuesto €${presupuestoMarketingReal.toFixed(0)}.`,
 
         // Added required fields
@@ -145,9 +145,6 @@ export const generateMockStrategyData = (store: AppStateData): AIStrategyRecomme
             'SMS con descuento por cumpleaños',
             'Notificación push si no visita en 30 días'
         ],
-        // productosGancho & productosImpulsar are NOT in AIStrategyRecommendation but were in old Result. 
-        // We can keep them if we want, but they are not in the Interface. 
-        // Just in case, I'll remove them or ignore them since interface doesn't have them.
         resumenEstrategia: estrategiaResumen
     };
 

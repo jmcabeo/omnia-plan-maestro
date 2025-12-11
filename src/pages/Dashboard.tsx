@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
 import BusinessSelector from '../components/BusinessSelector';
 import {
-    LayoutDashboard, PlusCircle, Play, FileText, BarChart2,
-    Database, ArrowRight, Zap, Settings, Briefcase, FolderOpen, FileSpreadsheet
+    PlusCircle, Play, FileText, BarChart2,
+    Database, ArrowRight, Zap, Settings, FolderOpen, FileSpreadsheet
 } from 'lucide-react';
 
 export default function Dashboard() {

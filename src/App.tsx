@@ -8,7 +8,7 @@ import DatasetBuilder from './pages/DatasetBuilder';
 import DataUpload from './pages/DataUpload';
 
 // Temporary placeholder for Generator and Results until created
-const StrategyGenerator = () => <div className="p-8 text-center text-xl font-bold text-slate-500">Generador de Estrategia Omnia (En construcción) - Integrará PlanIA logic</div>;
+// Temporary placeholder used for RealResults below
 const RealResults = () => <div className="p-8 text-center text-xl font-bold text-slate-500">Registro de Resultados Reales (En construcción)</div>;
 
 function App() {

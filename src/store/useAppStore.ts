@@ -27,7 +27,7 @@ interface AppStore extends AppStateData {
     // Config Actions (Wizard)
     updateCapacity: (data: Partial<OperationalCapacity>) => void;
     updateMarketing: (data: Partial<MarketingProfile>) => void;
-    updateStrategyConfig: (data: Partial<StrategyConfig>) => void;
+    updateStrategyConfig: (fieldOrData: keyof StrategyConfig | Partial<StrategyConfig>, value?: any) => void;
     updateConstraints: (data: Partial<BusinessConstraints>) => void;
 
     // Dataset & Results
@@ -199,9 +199,10 @@ export const useAppStore = create<AppStore>((set, get) => ({
         marketing: { ...state.marketing, ...data }
     })),
 
-    updateStrategyConfig: (data) => set((state) => ({
-        strategyConfig: { ...state.strategyConfig, ...data }
-    })),
+    updateStrategyConfig: (fieldOrData, value) => set((state) => {
+        const newData = typeof fieldOrData === 'string' ? { [fieldOrData]: value } : fieldOrData;
+        return { strategyConfig: { ...state.strategyConfig, ...newData } };
+    }),
 
     updateConstraints: (data) => set((state) => ({
         constraints: { ...state.constraints, ...data }
