@@ -413,21 +413,34 @@ const StepProducts = ({ store }: { store: any }) => {
                 // Detect delimiter: Semicolon has priority (common in EU/Excel)
                 const delimiter = cleanLine.includes(';') ? ';' : ',';
 
-                // Robust split: handles quoted strings containing delimiters
-                // e.g. "1,54", "2,20" will not be split if delimiter is comma
-                const parts = cleanLine
-                    .match(new RegExp(`(?:^|${delimiter})(\"(?:[^\"]|\"\")*\"|[^${delimiter}]*)`, 'g'))
-                    ?.map(entry => {
-                        // Remove delimiter from start if present
-                        let val = entry.startsWith(delimiter) ? entry.slice(delimiter.length) : entry;
-                        val = val.trim();
-                        // Remove surrounding quotes
-                        if (val.startsWith('"') && val.endsWith('"')) {
-                            val = val.slice(1, -1);
+                // Robust character-by-character parser
+                const parseLine = (text: string, delim: string) => {
+                    const parts: string[] = [];
+                    let current = '';
+                    let inQuote = false;
+                    for (let i = 0; i < text.length; i++) {
+                        const char = text[i];
+                        if (char === '"') {
+                            inQuote = !inQuote;
+                        } else if (char === delim && !inQuote) {
+                            parts.push(current.trim());
+                            current = '';
+                        } else {
+                            current += char;
                         }
-                        // Unescape double quotes
-                        return val.replace(/""/g, '"').trim();
-                    }) || [];
+                    }
+                    if (current) parts.push(current.trim());
+
+                    // Post-process: remove quotes
+                    return parts.map(p => {
+                        if (p.startsWith('"') && p.endsWith('"')) {
+                            return p.slice(1, -1).replace(/""/g, '"');
+                        }
+                        return p.trim();
+                    });
+                };
+
+                const parts = parseLine(cleanLine, delimiter);
 
                 // Helper to safely parse localized floats (handles "1,50" and "1.50")
                 const parseLocalFloat = (str: string) => {
@@ -438,12 +451,30 @@ const StepProducts = ({ store }: { store: any }) => {
                 };
 
                 // Expected Template: ID;Nombre;Categoria;Costo;Precio;VentasMensuales
-                // parts[0]=ID, parts[1]=Nombre, parts[2]=Cat, parts[3]=Costo, parts[4]=Precio, parts[5]=Ventas
                 if (parts.length >= 5) {
-                    const externalId = parts[0];
-                    const name = parts[1];
-                    const cost = parseLocalFloat(parts[3]);
-                    const price = parseLocalFloat(parts[4]);
+                    let externalId = parts[0];
+                    let name = parts[1];
+                    let category = parts[2];
+                    let costIdx = 3;
+                    let priceIdx = 4;
+                    let salesIdx = 5;
+
+                    // SMART DETECTION: If ID column is missing, data shifts left.
+                    // If 'Category' (index 2) is a number AND 'Name' (index 0) is text... assumes shift.
+                    // Standard: [ID="", Name, Cat, Cost, Price] -> parts[2] is text/Cat.
+                    // Shifted: [Name, Cat, Cost, Price, Sales] -> parts[2] is Cost (Number).
+                    if (!isNaN(parseLocalFloat(parts[2])) && isNaN(parseLocalFloat(parts[1]))) {
+                        // Detected Shift!
+                        externalId = '';
+                        name = parts[0];
+                        category = parts[1];
+                        costIdx = 2;
+                        priceIdx = 3;
+                        salesIdx = 4;
+                    }
+
+                    const cost = parseLocalFloat(parts[costIdx]);
+                    const price = parseLocalFloat(parts[priceIdx]);
 
                     if (name && !isNaN(price)) {
                         const margin = price > 0 ? ((price - cost) / price) * 100 : 0;
@@ -454,8 +485,8 @@ const StepProducts = ({ store }: { store: any }) => {
                             cost,
                             price,
                             margin,
-                            category: parts[2] || 'Importado',
-                            salesMonthly: parseLocalFloat(parts[5])
+                            category: category || 'Importado',
+                            salesMonthly: parseLocalFloat(parts[salesIdx])
                         });
                         addedCount++;
                     }
