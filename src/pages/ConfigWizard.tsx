@@ -438,18 +438,18 @@ const StepProducts = ({ store }: { store: any }) => {
                 };
 
                 // Expected Template: ID;Nombre;Categoria;Costo;Precio;VentasMensuales
-                // parts[0]=ID, parts[1]=Nombre, parts[2]=Cat, parts[3]=Costo, parts[4]=Precio
+                // parts[0]=ID, parts[1]=Nombre, parts[2]=Cat, parts[3]=Costo, parts[4]=Precio, parts[5]=Ventas
                 if (parts.length >= 5) {
+                    const externalId = parts[0];
                     const name = parts[1];
-                    // Cost is index 3
                     const cost = parseLocalFloat(parts[3]);
-                    // Price is index 4
                     const price = parseLocalFloat(parts[4]);
 
                     if (name && !isNaN(price)) {
                         const margin = price > 0 ? ((price - cost) / price) * 100 : 0;
                         store.addProduct({
                             id: Date.now() + Math.random(),
+                            externalId,
                             name,
                             cost,
                             price,
@@ -585,28 +585,24 @@ const StepProducts = ({ store }: { store: any }) => {
                     <table className="w-full text-sm text-left">
                         <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
                             <tr>
+                                <th className="p-3">ID</th>
                                 <th className="p-3">Nombre</th>
                                 <th className="p-3">Categoría</th>
-                                <th className="p-3">Ventas Mes</th>
-                                <th className="p-3">Precio</th>
                                 <th className="p-3">Costo</th>
-                                <th className="p-3">Margen</th>
+                                <th className="p-3">Precio</th>
+                                <th className="p-3">Ventas Mes</th>
                                 <th className="p-3 text-right">Acciones</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {store.products.map((product: any) => (
                                 <tr key={product.id} className="hover:bg-slate-50">
+                                    <td className="p-3 text-slate-500 text-xs font-mono">{product.externalId || '-'}</td>
                                     <td className="p-3 font-medium text-slate-800">{product.name}</td>
                                     <td className="p-3 text-slate-600 text-xs">{product.category || '-'}</td>
-                                    <td className="p-3 text-slate-600 text-xs">{product.salesMonthly || 0}</td>
-                                    <td className="p-3 text-emerald-600 font-bold">{Number(product.price).toFixed(2)} €</td>
                                     <td className="p-3 text-slate-500">{Number(product.cost).toFixed(2)} €</td>
-                                    <td className="p-3">
-                                        <span className={`px-2 py-1 rounded text-xs font-bold ${product.margin > 70 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                                            {Number(product.margin).toFixed(0)}%
-                                        </span>
-                                    </td>
+                                    <td className="p-3 text-emerald-600 font-bold">{Number(product.price).toFixed(2)} €</td>
+                                    <td className="p-3 text-slate-600 text-xs">{product.salesMonthly || 0}</td>
                                     <td className="p-3 text-right">
                                         <button
                                             onClick={() => store.removeProduct(product.id)}

@@ -14,6 +14,7 @@ export interface Product {
     price: number;
     margin: number;
     salesMonthly: number;
+    externalId?: string; // ID from CSV import
     prepTimeMinutes?: number;
     isCriticalMachine?: boolean;
     canBePrize?: boolean;
