@@ -586,6 +586,8 @@ const StepProducts = ({ store }: { store: any }) => {
                         <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
                             <tr>
                                 <th className="p-3">Nombre</th>
+                                <th className="p-3">Categoría</th>
+                                <th className="p-3">Ventas Mes</th>
                                 <th className="p-3">Precio</th>
                                 <th className="p-3">Costo</th>
                                 <th className="p-3">Margen</th>
@@ -596,6 +598,8 @@ const StepProducts = ({ store }: { store: any }) => {
                             {store.products.map((product: any) => (
                                 <tr key={product.id} className="hover:bg-slate-50">
                                     <td className="p-3 font-medium text-slate-800">{product.name}</td>
+                                    <td className="p-3 text-slate-600 text-xs">{product.category || '-'}</td>
+                                    <td className="p-3 text-slate-600 text-xs">{product.salesMonthly || 0}</td>
                                     <td className="p-3 text-emerald-600 font-bold">{Number(product.price).toFixed(2)} €</td>
                                     <td className="p-3 text-slate-500">{Number(product.cost).toFixed(2)} €</td>
                                     <td className="p-3">
