@@ -413,8 +413,33 @@ const StepProducts = ({ store }: { store: any }) => {
                 // Try semicolon first (common in Excel CSVs for Europe), then comma
                 const parts = cleanLine.includes(';') ? cleanLine.split(';') : cleanLine.split(',');
 
-                // Expected: Name; Price; Cost (Optional)
-                if (parts.length >= 2) {
+                // Expected Template: ID;Nombre;Categoria;Costo;Precio;VentasMensuales
+                // parts[0]=ID, parts[1]=Nombre, parts[2]=Cat, parts[3]=Costo, parts[4]=Precio
+                if (parts.length >= 5) {
+                    const name = parts[1].trim();
+                    // Cost is index 3
+                    const costStr = parts[3] ? parts[3].replace('€', '').replace('$', '').trim() : '0';
+                    // Price is index 4
+                    const priceStr = parts[4] ? parts[4].replace('€', '').replace('$', '').trim() : '0';
+
+                    const price = parseFloat(priceStr);
+                    const cost = parseFloat(costStr);
+
+                    if (name && !isNaN(price)) {
+                        const margin = price > 0 ? ((price - cost) / price) * 100 : 0;
+                        store.addProduct({
+                            id: Date.now() + Math.random(),
+                            name,
+                            cost,
+                            price,
+                            margin,
+                            category: parts[2]?.trim() || 'Importado',
+                            salesMonthly: parseFloat(parts[5] || '0')
+                        });
+                        addedCount++;
+                    }
+                } else if (parts.length >= 2 && !parts[0].match(/^P\d+/)) {
+                    // Fallback for simple format: Nombre;Precio;Costo (legacy support) - Check if part 0 is NOT an ID like P001
                     const name = parts[0].trim();
                     const priceStr = parts[1].replace('€', '').replace('$', '').trim();
                     const costStr = parts[2] ? parts[2].replace('€', '').replace('$', '').trim() : '0';
@@ -425,12 +450,12 @@ const StepProducts = ({ store }: { store: any }) => {
                     if (name && !isNaN(price)) {
                         const margin = price > 0 ? ((price - cost) / price) * 100 : 0;
                         store.addProduct({
-                            id: Date.now() + Math.random(), // Random ID to avoid collision in fast loops
+                            id: Date.now() + Math.random(),
                             name,
                             cost,
                             price,
                             margin,
-                            category: 'Importado',
+                            category: 'Manual',
                             salesMonthly: 0
                         });
                         addedCount++;
@@ -441,7 +466,7 @@ const StepProducts = ({ store }: { store: any }) => {
             if (addedCount > 0) {
                 alert(`✅ Se han importado ${addedCount} productos correctamente.`);
             } else {
-                alert('⚠️ No se encontraron productos válidos. Asegúrate de usar el formato: Nombre; Precio; Costo');
+                alert('⚠️ No se encontraron productos válidos. Usa la "Plantilla Catálogo" (ID;Nombre;Categoria;Costo;Precio...)');
             }
             if (fileInputRef.current) fileInputRef.current.value = ''; // Reset input
         };
