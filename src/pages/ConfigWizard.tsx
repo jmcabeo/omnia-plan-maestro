@@ -410,20 +410,41 @@ const StepProducts = ({ store }: { store: any }) => {
                 // Skip empty lines or headers
                 if (!cleanLine || cleanLine.toLowerCase().startsWith('nombre') || cleanLine.toLowerCase().startsWith('name') || cleanLine.toLowerCase().startsWith('id')) return;
 
-                // Try semicolon first (common in Excel CSVs for Europe), then comma
-                const parts = cleanLine.includes(';') ? cleanLine.split(';') : cleanLine.split(',');
+                // Detect delimiter: Semicolon has priority (common in EU/Excel)
+                const delimiter = cleanLine.includes(';') ? ';' : ',';
+
+                // Robust split: handles quoted strings containing delimiters
+                // e.g. "1,54", "2,20" will not be split if delimiter is comma
+                const parts = cleanLine
+                    .match(new RegExp(`(?:^|${delimiter})(\"(?:[^\"]|\"\")*\"|[^${delimiter}]*)`, 'g'))
+                    ?.map(entry => {
+                        // Remove delimiter from start if present
+                        let val = entry.startsWith(delimiter) ? entry.slice(delimiter.length) : entry;
+                        val = val.trim();
+                        // Remove surrounding quotes
+                        if (val.startsWith('"') && val.endsWith('"')) {
+                            val = val.slice(1, -1);
+                        }
+                        // Unescape double quotes
+                        return val.replace(/""/g, '"').trim();
+                    }) || [];
+
+                // Helper to safely parse localized floats (handles "1,50" and "1.50")
+                const parseLocalFloat = (str: string) => {
+                    if (!str) return 0;
+                    // Replace comma with dot for JS Float, remove currency symbols
+                    const clean = str.replace(/[€$]/g, '').trim().replace(',', '.');
+                    return parseFloat(clean);
+                };
 
                 // Expected Template: ID;Nombre;Categoria;Costo;Precio;VentasMensuales
                 // parts[0]=ID, parts[1]=Nombre, parts[2]=Cat, parts[3]=Costo, parts[4]=Precio
                 if (parts.length >= 5) {
-                    const name = parts[1].trim();
+                    const name = parts[1];
                     // Cost is index 3
-                    const costStr = parts[3] ? parts[3].replace('€', '').replace('$', '').trim() : '0';
+                    const cost = parseLocalFloat(parts[3]);
                     // Price is index 4
-                    const priceStr = parts[4] ? parts[4].replace('€', '').replace('$', '').trim() : '0';
-
-                    const price = parseFloat(priceStr);
-                    const cost = parseFloat(costStr);
+                    const price = parseLocalFloat(parts[4]);
 
                     if (name && !isNaN(price)) {
                         const margin = price > 0 ? ((price - cost) / price) * 100 : 0;
@@ -433,19 +454,16 @@ const StepProducts = ({ store }: { store: any }) => {
                             cost,
                             price,
                             margin,
-                            category: parts[2]?.trim() || 'Importado',
-                            salesMonthly: parseFloat(parts[5] || '0')
+                            category: parts[2] || 'Importado',
+                            salesMonthly: parseLocalFloat(parts[5])
                         });
                         addedCount++;
                     }
                 } else if (parts.length >= 2 && !parts[0].match(/^P\d+/)) {
-                    // Fallback for simple format: Nombre;Precio;Costo (legacy support) - Check if part 0 is NOT an ID like P001
-                    const name = parts[0].trim();
-                    const priceStr = parts[1].replace('€', '').replace('$', '').trim();
-                    const costStr = parts[2] ? parts[2].replace('€', '').replace('$', '').trim() : '0';
-
-                    const price = parseFloat(priceStr);
-                    const cost = parseFloat(costStr);
+                    // Fallback for simple format: Nombre;Precio;Costo
+                    const name = parts[0];
+                    const price = parseLocalFloat(parts[1]);
+                    const cost = parseLocalFloat(parts[2]);
 
                     if (name && !isNaN(price)) {
                         const margin = price > 0 ? ((price - cost) / price) * 100 : 0;
